@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runccc - Code Change Capture for Software Teams</title>
+    <meta name="description" content="Runccc shows everything a change touches before the push it, and gives coding agents a live code map with confined, previewed, revertible edits.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f6f5',
+                            100: '#e0eceb',
+                            200: '#bed7d5',
+                            300: '#9bc2bf',
+                            400: '#6da6a2',
+                            500: '#3F8A84',
+                            600: '#36726f',
+                            700: '#2e5b5a',
+                            800: '#254346',
+                            900: '#1d2c31',
+                        },
+                        secondary: {
+                            50: '#f9f4ef',
+                            100: '#f2eae0',
+                            200: '#e4d2bd',
+                            300: '#d6ba9a',
+                            400: '#c39a6b',
+                            500: '#B07A3C',
+                            600: '#916636',
+                            700: '#72512f',
+                            800: '#523d29',
+                            900: '#332822',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+        /* corp.png carries wide transparent padding; crop it to the 902x180 wordmark */
+        .corp-logo { position: relative; overflow: hidden; aspect-ratio: 902 / 180; }
+        .corp-logo img { position: absolute; max-width: none; width: 133.04%; left: -16.52%; top: -83.33%; }
+    </style>
+</head>
+<body class="h-full bg-gray-50">
+<div class="min-h-screen">
+    <header class="bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <a href="./" aria-label="Runccc home">
+                    <img src="ccc.png" alt="Runccc" class="h-7 sm:h-8 w-auto">
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="https://github.com/colwill/ccc" class="hidden sm:inline text-primary-100 hover:text-white transition-colors">GitHub</a>
+                    <a href="#quick-start" class="bg-white text-primary-600 px-4 py-2 rounded-lg font-medium hover:bg-primary-50 transition-colors">Install</a>
+                </div>
+            </div>
+        </nav>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+                See the Impact<br>
+                <span class="text-secondary-300">Before The Commit</span>
+            </h1>
+            <p class="mt-6 text-xl text-primary-100 max-w-3xl mx-auto">
+                Code Change Capture shows everything a change touches: the functions, tests, services and cross-service contracts it reaches. It shows them in your IDE, in your pipeline, and to the coding agents making the change.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#quick-start" class="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-50 transition-colors shadow-lg">
+                    Get started
+                </a>
+                <a href="#features" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors">
+                    See Features
+                </a>
+            </div>
+            <p class="mt-6 text-primary-200 text-sm">Open source core. Runs on your machine, and your code stays there.</p>
+        </div>
+        <div class="relative">
+            <svg class="w-full h-16 text-gray-50" preserveAspectRatio="none" viewBox="0 0 1440 54" fill="currentColor">
+                <path d="M0 22L60 16.7C120 11 240 1 360 0.3C480 0 600 9 720 16.3C840 24 960 30 1080 30.7C1200 31 1320 27 1380 24.3L1440 22V54H1380C1320 54 1200 54 1080 54C960 54 840 54 720 54C600 54 480 54 360 54C240 54 120 54 60 54H0V22Z"/>
+            </svg>
+        </div>
+    </header>
+
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-8 text-center sm:text-left">
+                <div class="flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" width="72" height="79" aria-label="Free and Open Source Software" role="img">
+                        <path fill="#3DA639" d="M50 0C22.4 0 0 22.4 0 50c0 21.5 13.6 39.9 32.7 47L42 73.7C34.5 70.5 29.2 63 29.2 54.3 29.2 42.8 38.5 33.5 50 33.5s20.8 9.3 20.8 20.8c0 8.7-5.3 16.2-12.8 19.4L67.3 97C86.4 89.9 100 71.5 100 50 100 22.4 77.6 0 50 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">
+                        Built on open source
+                    </h2>
+                    <p class="mt-3 text-lg text-gray-600">
+                        Runccc is built on <strong>ccc</strong> (Collateral Code Check), which is free and open source. Read the code, run it locally, and talk to us when your teams need more.
+                    </p>
+                    <a href="https://github.com/colwill/ccc"
+                       class="mt-5 inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-primary-700 transition-colors">
+                        View colwill/ccc
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary-600 font-semibold text-sm uppercase tracking-wide">Change Impact</span>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-bold text-gray-900">Know What a Change Reaches</h2>
+                <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+                    Agents now write much of the code, which makes it harder to follow what changed. Runccc lays out each change before it lands.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Tests at Risk</h3>
+                    <p class="text-gray-600">See which pipeline tests run against your change, and which services need testing, before you push.</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Cross-Service Calls</h3>
+                    <p class="text-gray-600">New or modified calls between services show up before you commit, even when the other side lives in another repository or language.</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Lints &amp; Security</h3>
+                    <p class="text-gray-600">Flags language lint violations, security findings and vulnerable dependencies checked against the OSV advisory database.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary-600 font-semibold text-sm uppercase tracking-wide">Features</span>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-bold text-gray-900">One Map, Many Views</h2>
+                <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+                    Runccc scans your project into an in-memory code map that stays current as you work. Everything below reads from that same map.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Live Code Map</h3>
+                    <p class="text-gray-600">Built on Tree-sitter. Every file's functions, return types, doc summaries, call graph and TODO/FIXME notes, refreshed seconds after each save.</p>
+                </div>
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">MCP Server for Agents</h3>
+                    <p class="text-gray-600">A local MCP server gives Claude, Copilot, Cursor and other agents exact answers on definitions, references, dependencies and test targets.</p>
+                </div>
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confined Edits</h3>
+                    <p class="text-gray-600">Agents change code through Runccc's edit tools rather than raw shell writes. Each edit stays inside the project and is staged as a diff, applied all-or-nothing and revertible.</p>
+                </div>
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Architecture Visualiser</h3>
+                    <p class="text-gray-600">Drill down from the whole system to a single function's logic, following the C4 model. A timeline replays what an agent read and changed, one definition at a time.</p>
+                </div>
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">IDE Extension</h3>
+                    <p class="text-gray-600">The VS Code extension runs the analysis in the background for each workspace folder, over loopback only, with nothing to configure.</p>
+                </div>
+                <div class="p-6">
+                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Pipelines</h3>
+                    <p class="text-gray-600">Run the same analysis in CI: changed services, dependency deltas, SAST and lockfile audits as JSON, with a non-zero exit on high-severity findings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="agents" class="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-500/20 text-primary-200 mb-4">
+                        For coding agents
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">Edits Go Through Runccc</h2>
+                    <p class="text-xl text-primary-100 mb-8">
+                        Agents read the map and also make their changes through it. A rename, a dead-code delete or a new function takes one previewed call, so the agent doesn't have to read and edit file by file.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-primary-300 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span class="text-primary-100"><strong class="text-white">One call per change</strong> &mdash; a rename follows the name through every file the map ties to it, and lists any same-named site it left alone</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-primary-300 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span class="text-primary-100"><strong class="text-white">Safe by construction</strong> &mdash; no writes outside the project root, no symlinks, never <code class="text-secondary-200">.git</code></span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-primary-300 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span class="text-primary-100"><strong class="text-white">All or nothing</strong> &mdash; every staged file is checked before writing, then every file is written or none is</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-6 h-6 text-primary-300 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span class="text-primary-100"><strong class="text-white">Traceable</strong> &mdash; every change can be reverted and credited to the request that asked for it</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gray-900 rounded-xl p-6 shadow-2xl min-w-0" x-data="{ activeTab: 'agents' }">
+                    <div class="flex items-center mb-4 border-b border-gray-700 pb-3">
+                        <div class="hidden sm:flex space-x-2 mr-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button @click="activeTab = 'agents'" :class="activeTab === 'agents' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Agents</button>
+                            <button @click="activeTab = 'map'" :class="activeTab === 'map' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Services</button>
+                            <button @click="activeTab = 'calls'" :class="activeTab === 'calls' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Calls</button>
+                        </div>
+                        <span class="ml-auto pl-4 text-gray-500 text-sm" x-text="activeTab === 'agents' ? 'AGENTS.md' : activeTab === 'map' ? '.ccc/map.json' : 'checkout.rs'"></span>
+                    </div>
+                    <pre x-show="activeTab === 'agents'" class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-blue-400"># AGENTS.md</span>
+
+This repo has a ccc map served over MCP at
+<span class="text-green-400">http://127.0.0.1:6767/mcp</span>. Use it as the
+entry point for everything you do here.
+
+- Navigation and questions go through the
+  ccc tools: <span class="text-yellow-400">find</span>, <span class="text-yellow-400">references</span>, <span class="text-yellow-400">dependencies</span>,
+  <span class="text-yellow-400">test_targets</span>, <span class="text-yellow-400">changes</span>, ...
+- ccc is the only writer: make every change
+  with <span class="text-yellow-400">edit_rename</span>, <span class="text-yellow-400">edit_replace</span>, <span class="text-yellow-400">edit_delete</span>,
+  <span class="text-yellow-400">edit_insert</span> or <span class="text-yellow-400">edit_text</span>, then <span class="text-yellow-400">edit_apply</span>.</code></pre>
+                    <pre x-show="activeTab === 'map'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code>{
+  <span class="text-blue-400">"services"</span>: {
+    <span class="text-blue-400">"auth"</span>:    [<span class="text-green-400">"apps/auth/**"</span>],
+    <span class="text-blue-400">"billing"</span>: [<span class="text-green-400">"apps/billing/**"</span>, <span class="text-green-400">"libs/money/**"</span>],
+    <span class="text-blue-400">"gateway"</span>: [<span class="text-green-400">"apps/gateway/**"</span>]
+  },
+  <span class="text-blue-400">"relatives"</span>: {
+    <span class="text-gray-500">// gateway calls auth over HTTP</span>
+    <span class="text-blue-400">"gateway"</span>: [<span class="text-green-400">"auth"</span>]
+  },
+  <span class="text-blue-400">"externals"</span>: {
+    <span class="text-blue-400">"billing"</span>: { <span class="text-blue-400">"repo"</span>: <span class="text-green-400">"acme/billing"</span>, <span class="text-blue-400">"lang"</span>: <span class="text-green-400">"go"</span> }
+  }
+}</code></pre>
+                    <pre x-show="activeTab === 'calls'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500">// gateway (rust)</span>
+<span class="text-blue-400">fn</span> <span class="text-yellow-400">checkout</span>(cart: &amp;[Item]) {
+    <span class="text-gray-500">// ccc:calls grpc billing.v1.Charge</span>
+    client.<span class="text-yellow-400">charge</span>(total)
+}
+
+<span class="text-gray-500">// billing (go), another repository</span>
+<span class="text-gray-500">// ccc:serves grpc billing.v1.Charge</span>
+<span class="text-blue-400">func</span> <span class="text-yellow-400">Charge</span>(account <span class="text-blue-400">string</span>, amount <span class="text-blue-400">int</span>) <span class="text-blue-400">error</span> { ... }</code></pre>
+                </div>
+            </div>
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-white/10 rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">~14x</div>
+                    <div class="text-primary-200 text-sm">Fewer tokens for a project-wide rename*</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">3</div>
+                    <div class="text-primary-200 text-sm">Calls to rename across 8 files, down from 29*</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">11</div>
+                    <div class="text-primary-200 text-sm">Languages mapped</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">5</div>
+                    <div class="text-primary-200 text-sm">Visualiser levels, system to logic</div>
+                </div>
+            </div>
+            <p class="mt-6 text-center text-primary-300 text-xs">*Estimate: renaming a function used at 20 sites across 8 files of ~300 lines, by an agent that must read a file before editing it.</p>
+        </div>
+    </section>
+
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary-600 font-semibold text-sm uppercase tracking-wide">Why Runccc</span>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-bold text-gray-900">Fewer Tokens, More Oversight</h2>
+                <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+                    An agent's own tools read whole files to change a few lines. Runccc's edits act on the map, so agents need fewer turns and you can see each change before it's written.
+                </p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg border border-primary-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm">
+                        <thead class="bg-primary-50 text-primary-800">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Task</th>
+                                <th class="px-6 py-4 font-semibold">Agent's own tools</th>
+                                <th class="px-6 py-4 font-semibold">Through Runccc</th>
+                                <th class="px-6 py-4 font-semibold">Saving</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-gray-900">Rename a function used at 20 sites in 8 files</td>
+                                <td class="px-6 py-4">≈ 33k tokens, 29 calls</td>
+                                <td class="px-6 py-4">≈ 2.3k tokens, 3 calls</td>
+                                <td class="px-6 py-4 font-semibold text-primary-600">~14x tokens, ~10x calls</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-gray-900">Delete a dead 50-line function</td>
+                                <td class="px-6 py-4">≈ 4.4k tokens, 3 calls</td>
+                                <td class="px-6 py-4">≈ 1k tokens, 2 calls</td>
+                                <td class="px-6 py-4 font-semibold text-primary-600">~4x tokens</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-gray-900">Add a 25-line function beside an existing one</td>
+                                <td class="px-6 py-4">≈ 4.2k tokens, 3 calls</td>
+                                <td class="px-6 py-4">≈ 0.9k tokens, 2 calls</td>
+                                <td class="px-6 py-4 font-semibold text-primary-600">~4.5x tokens</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-gray-900">Change a few lines inside one function</td>
+                                <td class="px-6 py-4">read + edit</td>
+                                <td class="px-6 py-4">read + edit</td>
+                                <td class="px-6 py-4 text-gray-500">about even</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="px-6 py-4 text-xs text-gray-500 border-t border-gray-100">Estimates assume 300-line source files at ~12 tokens a line, and an agent that must read a file before it edits it. Every call saved is also a model turn saved.</p>
+            </div>
+            <div class="mt-12 text-center">
+                <p class="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-4">Languages</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">C99</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">C++20</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">C#</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Rust</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Go</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Python</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Zig</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Odin</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">TypeScript</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">JavaScript</span>
+                    <span class="px-3 py-1 rounded-full bg-white border border-gray-200 text-sm text-gray-700">Protobuf</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quick-start" class="py-20 bg-primary-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white">Running in Minutes</h2>
+                <p class="mt-4 text-xl text-primary-200">Install, map your project, and point your agent at it.</p>
+            </div>
+            <div class="max-w-3xl mx-auto bg-gray-900 rounded-xl p-6 shadow-2xl" x-data="{ activeTab: 'install' }">
+                <div class="flex items-center mb-4 border-b border-gray-700 pb-3 overflow-x-auto">
+                    <div class="hidden sm:flex space-x-2 mr-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button @click="activeTab = 'install'" :class="activeTab === 'install' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Install</button>
+                        <button @click="activeTab = 'run'" :class="activeTab === 'run' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Run</button>
+                        <button @click="activeTab = 'agent'" :class="activeTab === 'agent' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">Agent</button>
+                        <button @click="activeTab = 'ci'" :class="activeTab === 'ci' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors">CI</button>
+                    </div>
+                    <span class="ml-auto pl-4 text-gray-500 text-sm">bash</span>
+                </div>
+                <pre x-show="activeTab === 'install'" class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500"># Latest release (Linux / macOS / Windows)</span>
+curl -fsSL https://raw.githubusercontent.com/colwill/ccc/main/install.sh | bash
+
+<span class="text-gray-500"># or build from source</span>
+cargo build --release &amp;&amp; ./target/release/ccc -- install</code></pre>
+                <pre x-show="activeTab === 'run'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500"># Generate .ccc/map.json, then add your services to it</span>
+<span class="text-yellow-400">ccc</span> init
+
+<span class="text-gray-500"># In-memory map, MCP server and insights UI</span>
+<span class="text-yellow-400">ccc</span> run              <span class="text-gray-500"># http://127.0.0.1:6767/insights</span>
+<span class="text-yellow-400">ccc</span> run --vis        <span class="text-gray-500"># ...and the visualiser at :6767/vis</span></code></pre>
+                <pre x-show="activeTab === 'agent'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500"># Claude Code</span>
+<span class="text-yellow-400">claude</span> mcp add --transport http ccc http://127.0.0.1:6767/mcp
+
+<span class="text-gray-500"># GitHub Copilot</span>
+<span class="text-yellow-400">copilot</span> mcp add --transport http ccc http://127.0.0.1:6767/mcp
+
+<span class="text-gray-500"># Then add the ccc block to AGENTS.md and work as usual</span></code></pre>
+                <pre x-show="activeTab === 'ci'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-yellow-400">ccc</span> changes --telemetry   <span class="text-gray-500"># services to test vs the base ref</span>
+<span class="text-yellow-400">ccc</span> deps                  <span class="text-gray-500"># dependency delta as JSON</span>
+<span class="text-yellow-400">ccc</span> sast                  <span class="text-gray-500"># non-zero exit on a high finding</span>
+<span class="text-yellow-400">ccc</span> audit                 <span class="text-gray-500"># lockfiles vs the OSV advisory db</span>
+<span class="text-yellow-400">ccc</span> insights --html report.html</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Rolling it out across teams?</h2>
+            <p class="mt-4 text-xl text-gray-600">
+                Talk to us about Runccc for your organisation: support, onboarding, and running it across many repositories and services.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://runcorp.dev/#contact" class="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition-colors shadow-lg">
+                    Contact us
+                </a>
+                <a href="https://github.com/colwill/ccc" class="inline-block border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-50 transition-colors">
+                    Try the open source version
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-neutral-950 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <a href="https://runcorp.dev" class="corp-logo w-[180px]" aria-label="RunCorp">
+                    <img src="brand/corp.png" alt="RunCorp">
+                </a>
+                <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-neutral-400">
+                    <a href="https://github.com/colwill" class="hover:text-white transition-colors">Open source</a>
+                    <a href="https://runcorp.dev/#contact" class="hover:text-white transition-colors">Contact</a>
+                </div>
+            </div>
+            <div class="mt-10 flex flex-wrap justify-center items-center gap-x-10 gap-y-6">
+                <a href="https://ccc.runcorp.dev" class="opacity-70 hover:opacity-100 transition-opacity"><img src="brand/ccc.png" alt="RunCCC" class="h-6 w-auto"></a>
+                <a href="https://cfg.runcorp.dev" class="opacity-70 hover:opacity-100 transition-opacity"><img src="brand/cfg.png" alt="RunCFG" class="h-6 w-auto"></a>
+                <a href="https://doc.runcorp.dev" class="opacity-70 hover:opacity-100 transition-opacity"><img src="brand/doc.png" alt="RunDOC" class="h-6 w-auto"></a>
+            </div>
+            <div class="mt-10 pt-8 border-t border-neutral-800 text-center text-neutral-500 text-sm">
+                &copy; 2026 RunCorp.dev. All rights reserved.
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>
