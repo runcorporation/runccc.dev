@@ -546,9 +546,9 @@ entry point for everything you do here.
                 <pre x-show="activeTab === 'run'" class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500"># Generate .ccc/map.json, then add your services to it</span>
 <span class="text-yellow-400">ccc</span> init
 
-<span class="text-gray-500"># In-memory map, MCP server and insights UI</span>
-<span class="text-yellow-400">ccc</span> run              <span class="text-gray-500"># http://127.0.0.1:6767/insights</span>
-<span class="text-yellow-400">ccc</span> run --vis        <span class="text-gray-500"># ...and the visualiser at :6767/vis</span></code></pre>
+<span class="text-gray-500"># In-memory map & MCP server</span>
+<span class="text-yellow-400">ccc</span> run              <span class="text-gray-500"># http://127.0.0.1:6767</span>
+<span class="text-yellow-400">ccc</span> run --vis        <span class="text-gray-500"># visualiser at :6767/vis</span></code></pre>
                 <pre x-show="activeTab === 'agent'" x-cloak class="text-sm text-gray-100 overflow-x-auto"><code><span class="text-gray-500"># Claude Code</span>
 <span class="text-yellow-400">claude</span> mcp add --transport http ccc http://127.0.0.1:6767/mcp
 
